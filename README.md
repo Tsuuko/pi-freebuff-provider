@@ -1,5 +1,9 @@
 # pi-freebuff-provider
 
+> [!WARNING]
+> **本リポジトリは研究用途 (protocol research / educational) です。**
+> 公式クライアントではない第三者実装であり、freebuff 側の利用規約・サーバー側の検証ゲート (システムプロンプト検査、公式ツールシグネチャ検査、外国クライアント検出など) を回避する性質のものです。アカウント停止 (banned) や予告のない仕様変更・機能不全の可能性を理解した上で、自己責任で利用してください。日常的な利用は公式 CLI (`freebuff`) を使ってください。
+
 [pi coding agent](https://github.com/earendil-works/pi-mono) 用の [Freebuff](https://freebuff.com) プロバイダ拡張。
 Freebuff 公式 CLI (Codebuff の FREE モードフォーク) のプロトコルを模倣し、無料モデルを pi から直接使えるようにする。
 
