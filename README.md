@@ -3,18 +3,26 @@
 [pi coding agent](https://github.com/earendil-works/pi-mono) 用の [Freebuff](https://freebuff.com) プロバイダ拡張。
 Freebuff 公式 CLI (Codebuff の FREE モードフォーク) のプロトコルを模倣し、無料モデルを pi から直接使えるようにする。
 
-## セットアップ
+## インストール
 
 ```bash
+pi install git:github.com/Tsuuko/pi-freebuff-provider
+# または pi install https://github.com/Tsuuko/pi-freebuff-provider
+```
+
+ユーザー設定 (`~/.pi/agent/settings.json`) に登録され、すべてのプロジェクトで有効になる。試すだけなら `pi -e git:github.com/Tsuuko/pi-freebuff-provider` (その場限り)。
+
+更新: `pi update --extensions`、削除: `pi remove git:github.com/Tsuuko/pi-freebuff-provider`。
+
+開発用にローカル clone から使う場合:
+
+```bash
+git clone https://github.com/Tsuuko/pi-freebuff-provider
 pnpm install
+pi -e /path/to/pi-freebuff-provider
 ```
 
 ## 使い方
-
-```bash
-# 拡張を読み込んで起動
-pi -e /path/to/pi-freebuff-provider
-```
 
 1. TUI で `/login freebuff` → ブラウザが開く → freebuff.com にログイン
    (CLI ベースで済ませるなら `node --experimental-strip-types scripts/login.mts`)
