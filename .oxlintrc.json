@@ -1,0 +1,10 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "ignorePatterns": ["node_modules/**", "__local/**"],
+  "rules": {
+    "typescript/no-explicit-any": "warn"
+  },
+  "options": {
+    "typeAware": true
+  }
+}

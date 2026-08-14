@@ -1,0 +1,24 @@
+{
+  "name": "pi-freebuff-provider",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "tsgo --noEmit",
+    "lint": "oxlint"
+  },
+  "devDependencies": {
+    "@earendil-works/pi-ai": "0.84.2",
+    "@earendil-works/pi-coding-agent": "0.84.2",
+    "@types/node": "^26.2.0",
+    "oxlint": "^1.15.0",
+    "oxlint-tsgolint": "^7.0.2001",
+    "typescript": "npm:@typescript/native-preview@7.0.0-dev.20260707.2",
+    "undici": "^8.10.0"
+  },
+  "pi": {
+    "extensions": [
+      "./index.ts"
+    ]
+  }
+}
