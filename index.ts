@@ -45,7 +45,7 @@ import type {
   OAuthLoginCallbacks,
   SimpleStreamOptions,
 } from "@earendil-works/pi-ai/compat";
-import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { FooterComponent } from "@earendil-works/pi-coding-agent";
 import { createRequire } from "node:module";
 import { readFileSync } from "node:fs";
@@ -348,26 +348,38 @@ let lastToken: string | undefined;
 // ============================================================================
 /** FooterComponent に渡す session 相当 (ctx から組み立て)。 */
 let lastSessionRef: unknown;
-/** 最新の ctx (session_start/model_select で更新)。 */
-let lastCtx: { model?: unknown; thinkingLevel?: string; getContextUsage?: () => unknown; sessionManager?: unknown } | undefined;
-
-/** FooterComponent が必要とする session の形を ctx から組み立てて保持する。 */
-function rememberCtx(ctx: {
+/** フッター用の状態 snapshot。ctx 自体は保持しない: in-process サブエー
+ *  ジェントも session_start を発火し、破棄後の ctx は stale 例外を投げる
+ *  (runner.assertActive)。イベント受信時に値を評価し、mode が "tui"
+ *  (対話メインセッション) のものだけ残す。sessionManager は生オブジェ
+ *  クトなので render 時にも最新が読める。 */
+let footerSnapshot: {
   model?: unknown;
   thinkingLevel?: string;
-  getContextUsage?: () => unknown;
+  contextUsage?: unknown;
   sessionManager?: unknown;
-}): void {
-  lastCtx = ctx;
+} | undefined;
+
+function rememberCtx(ctx: ExtensionContext): void {
+  if (ctx.mode !== "tui") return;
+  footerSnapshot = {
+    model: ctx.model,
+    thinkingLevel: ctx.thinkingLevel,
+    contextUsage: ctx.getContextUsage(),
+    sessionManager: ctx.sessionManager,
+  };
+  // getter は常に最新の footerSnapshot を読むので、毎回作り直してよい。
   lastSessionRef = {
     get state() {
       return {
-        model: lastCtx?.model,
-        thinkingLevel: lastCtx?.thinkingLevel,
+        model: footerSnapshot?.model,
+        thinkingLevel: footerSnapshot?.thinkingLevel,
       };
     },
-    getContextUsage: () => lastCtx?.getContextUsage?.(),
-    sessionManager: lastCtx?.sessionManager,
+    getContextUsage: () => footerSnapshot?.contextUsage,
+    get sessionManager() {
+      return footerSnapshot?.sessionManager;
+    },
     modelRuntime: { isUsingSubscription: () => false },
     autoCompactionEnabled: true,
   };
@@ -1054,6 +1066,10 @@ export default function (pi: ExtensionAPI) {
   // 参考: "model maximum context length: 1048575" (provider 拒否メッセージ実測)。
   const OVERFLOW_PATTERN = /maximum context length|context length exceeded|input length should be/i;
   pi.on("message_end", (event, ctx) => {
+    // フッターの context 使用率を受信時に更新 (render 時に ctx は触れない)。
+    if (ctx.mode === "tui" && footerSnapshot) {
+      footerSnapshot.contextUsage = ctx.getContextUsage();
+    }
     const message = event.message;
     if (message.role !== "assistant") return;
     if (message.stopReason !== "error") return;
